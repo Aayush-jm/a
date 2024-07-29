@@ -83,7 +83,7 @@ select * from
             when rewards_subscription_id = 241 then 'SHOPPING'
             when rewards_subscription_id = 242 then 'TRAVEL'
         end as category_selected,
-        row_number() over(partition by user_id order by created_at desc) r 
+        row_number() over(partition by user_id order by created_at asc) r 
 from jupiter.rewards.stg_rewards_user_subscriptions
 where rewards_subscription_id in (240, 241, 242)
 )
@@ -99,8 +99,7 @@ final as
     o.is_virtual_card_activated,
     o.physical_card_ordered_at,
     o.physical_card_delivered_at,	
-    o.is_physical_card_activated,
-    o.user_state as is_etj_ntj,
+    o.is_physical_card_activated,	
     o.terminated_at,
     
     report_user_proxy_income.age_bucket,
@@ -232,4 +231,7 @@ left join switch switch on o.user_id = switch.user_id
 )
 
 select * from final
-
+where 
+    is_success_transaction = true 
+    and transaction_type = 'DEBIT'
+    
